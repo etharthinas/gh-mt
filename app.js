@@ -20,22 +20,22 @@ const VS_GAMES = [
 const MINI_GAMES = [
   // 1v2 (one vs two)
   { name: '그림자지우기', img: './game_descriptions/미니게임/1v2/그림자지우기.png', type: '1v2' },
-  { name: '눈치게임',    img: './game_descriptions/미니게임/1v2/눈치게임.png',    type: '1v2' },
-  { name: '꼬리잡기',   img: './game_descriptions/미니게임/1v2/꼬리잡기.png',    type: '1v2' },
-  { name: '가짜리액션', img: './game_descriptions/미니게임/1v2/가짜리액션.png',  type: '1v2' },
+  { name: '눈치게임', img: './game_descriptions/미니게임/1v2/눈치게임.png', type: '1v2' },
+  { name: '꼬리잡기', img: './game_descriptions/미니게임/1v2/꼬리잡기.png', type: '1v2' },
+  { name: '가짜리액션', img: './game_descriptions/미니게임/1v2/가짜리액션.png', type: '1v2' },
   { name: '침묵의스파이', img: './game_descriptions/미니게임/1v2/침묵의스파이.png', type: '1v2' },
-  { name: '팀전야바위', img: './game_descriptions/미니게임/1v2/팀전야바위.png',  type: '1v2' },
+  { name: '팀전야바위', img: './game_descriptions/미니게임/1v2/팀전야바위.png', type: '1v2' },
   // 1:1:1 win (one winner)
-  { name: '술믈리에',   img: './game_descriptions/미니게임/111/win/술믈리에.png',   type: '111_win' },
+  { name: '술믈리에', img: './game_descriptions/미니게임/111/win/술믈리에.png', type: '111_win' },
   { name: '지석진게임', img: './game_descriptions/미니게임/111/win/지석진게임.png', type: '111_win' },
-  { name: '제로게임',   img: './game_descriptions/미니게임/111/win/제로게임.png',   type: '111_win' },
+  { name: '제로게임', img: './game_descriptions/미니게임/111/win/제로게임.png', type: '111_win' },
   { name: '스피드퀴즈', img: './game_descriptions/미니게임/111/win/스피드퀴즈.png', type: '111_win' },
-  { name: '35게임',    img: './game_descriptions/미니게임/111/win/35게임.png',    type: '111_win' },
+  { name: '35게임', img: './game_descriptions/미니게임/111/win/35게임.png', type: '111_win' },
   // 1:1:1 lose (one loser)
   { name: '초간단미션', img: './game_descriptions/미니게임/111/lose/초간단미션.png', type: '111_lose' },
-  { name: '리듬게임',   img: './game_descriptions/미니게임/111/lose/리듬게임.png',   type: '111_lose' },
+  { name: '리듬게임', img: './game_descriptions/미니게임/111/lose/리듬게임.png', type: '111_lose' },
   { name: '가사제시어', img: './game_descriptions/미니게임/111/lose/가사제시어.png', type: '111_lose' },
-  { name: '이중모션',   img: './game_descriptions/미니게임/111/lose/이중모션.png',   type: '111_lose' },
+  { name: '이중모션', img: './game_descriptions/미니게임/111/lose/이중모션.png', type: '111_lose' },
 ];
 
 const SPECIAL_EVENTS = [
@@ -56,7 +56,7 @@ const MONSTER_EVENTS = [
 ];
 
 const KO = {
-  title: 'GH 성장 레이스',
+  title: 'GH 술먹어',
   subtitle: 'Growth Hackers 파티 보드게임',
   reset: '↺ 초기화',
   mapView: '전체 지도',
@@ -1204,12 +1204,14 @@ function App() {
       let savedNames = {};
       try { const s = localStorage.getItem('gh_team_names'); if (s) savedNames = JSON.parse(s); } catch (_) { }
       setConfig(data);
-      setTeams(data.teams.map(t => ({
+      const mappedTeams = data.teams.map(t => ({
         ...t, position: 1, coins: data.settings.startingCoins,
         name: savedNames[t.id] ? savedNames[t.id].name : t.name,
         imageUrl: savedNames[t.id]?.imageUrl ?? t.imageUrl ?? null,
         skipTurn: false, shieldActive: false, doubleCoins: false, forcedMove: false,
-      })));
+      }));
+      mappedTeams.forEach(t => { if (t.imageUrl) { const i = new Image(); i.src = t.imageUrl; } });
+      setTeams(mappedTeams);
     }).catch(() => alert('board.json 로드 실패. 웹서버에서 실행하세요.'));
   }, []);
 
@@ -1710,23 +1712,23 @@ function App() {
       {coinAwardModal && !winner && (
         coinAwardModal.source === 'vs'
           ? <VsCoinModal
-              teams={teams}
-              teamIdx={coinAwardModal.teamIdx}
-              opponentIdx={coinAwardModal.opponentIdx}
-              onConfirm={(deltas) => {
-                setTeams(prev => prev.map((t, i) => ({ ...t, coins: Math.max(0, t.coins + deltas[i]) })));
-                setCoinAwardModal(null);
-                flushCarousel();
-              }}
-            />
+            teams={teams}
+            teamIdx={coinAwardModal.teamIdx}
+            opponentIdx={coinAwardModal.opponentIdx}
+            onConfirm={(deltas) => {
+              setTeams(prev => prev.map((t, i) => ({ ...t, coins: Math.max(0, t.coins + deltas[i]) })));
+              setCoinAwardModal(null);
+              flushCarousel();
+            }}
+          />
           : <MiniGameCoinModal
-              teams={teams}
-              game={coinAwardModal.game}
-              onConfirm={(deltas) => {
-                setTeams(prev => prev.map((t, i) => ({ ...t, coins: Math.max(0, t.coins + deltas[i]) })));
-                setCoinAwardModal(null);
-              }}
-            />
+            teams={teams}
+            game={coinAwardModal.game}
+            onConfirm={(deltas) => {
+              setTeams(prev => prev.map((t, i) => ({ ...t, coins: Math.max(0, t.coins + deltas[i]) })));
+              setCoinAwardModal(null);
+            }}
+          />
       )}
 
       {/* Floating +5 turns button */}

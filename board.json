@@ -68,6 +68,6 @@
     { "id": 57, "type": "blue",   "coinChange":  20, "text": "" },
     { "id": 58, "type": "vs",     "coinChange":   0, "text": "" },
     { "id": 59, "type": "red",    "coinChange": -20, "text": "" },
-    { "id": 60, "type": "drink", "coinChange":  30, "text": "VC 🍺" }
+    { "id": 60, "type": "drink", "coinChange":  0, "text": "VC 🍺" }
   ]
 }
