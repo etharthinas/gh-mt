@@ -38,6 +38,14 @@ const MINI_GAMES = [
   { name: '이중모션', img: './game_descriptions/미니게임/111/lose/이중모션.png', type: '111_lose' },
 ];
 
+const RHYTHM_LINKS = [
+  'https://www.youtube.com/watch?si=ksgpZL4QVJ5Fh2hS&v=_RiQjsu1KIw&feature=youtu.be',
+  'https://www.youtube.com/watch?si=wftDeuPuYS8nWB_2&v=CZPiQWo3RXA&feature=youtu.be',
+  'https://www.youtube.com/watch?si=qe5HOp2h0F5xdTC0&v=c3ShLpWB8Jg&feature=youtu.be',
+  'https://www.youtube.com/shorts/LhP8-2US99Q?si=A83W4G1rXhUMORa_',
+  'https://www.youtube.com/watch?si=3YWJ1e5ce2OqRhJC&v=f6GLEbQDiHM&feature=youtu.be',
+];
+
 const SPECIAL_EVENTS = [
   { id: 'steal', emoji: '🦊', name: '코인 훔치기', desc: '한 팀에게서 코인 5개를 훔칩니다', needsTeam: true, needsCell: false },
   { id: 'drink', emoji: '🍺', name: '음주 선고', desc: '한 팀을 지목해 술을 마시게 합니다', needsTeam: true, needsCell: false },
@@ -782,6 +790,13 @@ function RoundCarousel({ round, onClose }) {
                 width: '100%', maxHeight: 420, objectFit: 'contain', borderRadius: 12, marginBottom: 20,
                 border: '1px solid rgba(255,255,255,0.12)', cursor: 'zoom-in'
               }} />
+            {game.name === '리듬게임' && (
+              <button
+                className="modal-play-again"
+                style={{ background: '#E91E63', marginBottom: 12 }}
+                onClick={() => window.open(RHYTHM_LINKS[Math.floor(Math.random() * RHYTHM_LINKS.length)], '_blank')}
+              >🎵 랜덤 노래 뽑기</button>
+            )}
             <button className="modal-play-again" onClick={() => onClose(game)}>게임 시작! 🎮</button>
           </div>
         </div>
