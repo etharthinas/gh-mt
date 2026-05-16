@@ -4,7 +4,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 const CR = 24;
 const BOARD_W = 1110;
 const BOARD_H = 680;
-const MAX_TURNS = 30;
+const MAX_TURNS = 20;
 
 const VS_GAMES = [
   { name: '묵찌빠', img: './game_descriptions/vs게임/묵찌빠.png' },
@@ -24,13 +24,13 @@ const MINI_GAMES = [
   { name: '꼬리잡기', img: './game_descriptions/미니게임/1v2/꼬리잡기.png', type: '1v2' },
   { name: '가짜리액션', img: './game_descriptions/미니게임/1v2/가짜리액션.png', type: '1v2' },
   { name: '침묵의스파이', img: './game_descriptions/미니게임/1v2/침묵의스파이.png', type: '1v2' },
-  { name: '팀전야바위', img: './game_descriptions/미니게임/1v2/팀전야바위.png', type: '1v2' },
   // 1:1:1 win (one winner)
   { name: '술믈리에', img: './game_descriptions/미니게임/111/win/술믈리에.png', type: '111_win' },
   { name: '지석진게임', img: './game_descriptions/미니게임/111/win/지석진게임.png', type: '111_win' },
   { name: '제로게임', img: './game_descriptions/미니게임/111/win/제로게임.png', type: '111_win' },
   { name: '스피드퀴즈', img: './game_descriptions/미니게임/111/win/스피드퀴즈.png', type: '111_win' },
   { name: '35게임', img: './game_descriptions/미니게임/111/win/35게임.png', type: '111_win' },
+  { name: '개굴가위바위보', img: './game_descriptions/미니게임/111/win/개굴가위바위보.png', type: '111_win' },
   // 1:1:1 lose (one loser)
   { name: '초간단미션', img: './game_descriptions/미니게임/111/lose/초간단미션.png', type: '111_lose' },
   { name: '리듬게임', img: './game_descriptions/미니게임/111/lose/리듬게임.png', type: '111_lose' },
@@ -43,25 +43,43 @@ const RHYTHM_LINKS = [
   'https://www.youtube.com/watch?si=wftDeuPuYS8nWB_2&v=CZPiQWo3RXA&feature=youtu.be',
   'https://www.youtube.com/watch?si=qe5HOp2h0F5xdTC0&v=c3ShLpWB8Jg&feature=youtu.be',
   'https://www.youtube.com/shorts/LhP8-2US99Q?si=A83W4G1rXhUMORa_',
-  'https://www.youtube.com/watch?si=3YWJ1e5ce2OqRhJC&v=f6GLEbQDiHM&feature=youtu.be',
+];
+
+const SONGS_LINKS = [
+  'https://www.youtube.com/watch?si=S8FcKr139kW__91V&v=bNYArKgo2Ns&feature=youtu.be',
+  'https://www.youtube.com/watch?si=sGyuGQtZC7BR2LId&v=dly3BvtmXbA&feature=youtu.be',
+  'https://www.youtube.com/watch?si=Ay_6ZSqQqa8cp9B9&v=hHBo6QTr2u4&feature=youtu.be',
+  'https://www.youtube.com/watch?si=hGdUQNMNDGoCe3Oe&v=hL7ghGczUj0&feature=youtu.be',
+  'https://www.youtube.com/watch?si=mbnCpbbhhDYLcki-&v=vQwCIAKrAqo&feature=youtu.be',
+  'https://www.youtube.com/watch?si=juyMtf-SmnAwX4kB&v=i-GSglJw_9g&feature=youtu.be',
 ];
 
 const SPECIAL_EVENTS = [
-  { id: 'steal', emoji: '🦊', name: '코인 훔치기', desc: '한 팀에게서 코인 5개를 훔칩니다', needsTeam: true, needsCell: false },
-  { id: 'drink', emoji: '🍺', name: '음주 선고', desc: '한 팀을 지목해 술을 마시게 합니다', needsTeam: true, needsCell: false },
-  { id: 'switch', emoji: '🔄', name: '위치 교환', desc: '한 팀과 보드 위치를 교환합니다', needsTeam: true, needsCell: false },
-  { id: 'donate', emoji: '🎁', name: '코인 기부', desc: '한 팀에게 코인 5개를 줍니다', needsTeam: true, needsCell: false },
-  { id: 'random', emoji: '🎲', name: '랜덤 이동', desc: '보드의 랜덤 위치로 이동합니다', needsTeam: false, needsCell: false },
-  { id: 'double', emoji: '✨', name: '2배 코인', desc: '다음 코인 획득량이 2배가 됩니다', needsTeam: false, needsCell: false },
-  { id: 'send', emoji: '📍', name: '강제 이동', desc: '한 팀을 지정된 칸으로 강제 이동시킵니다', needsTeam: true, needsCell: true },
+  { id: 'steal', emoji: '🦊', name: '코인 훔치기', desc: '한 팀에게서 코인 5개를 훔칩니다', needsTeam: true, needsCell: false, prob: 0.2 },
+  { id: 'drink', emoji: '🍺', name: '음주 선고', desc: '한 팀을 지목해 술을 마시게 합니다', needsTeam: true, needsCell: false, prob: 0.2 },
+  { id: 'switch', emoji: '🔄', name: '위치 교환', desc: '한 팀과 보드 위치를 교환합니다', needsTeam: true, needsCell: false, prob: 0.1 },
+  { id: 'donate', emoji: '🎁', name: '코인 기부', desc: '한 팀에게 코인 5개를 줍니다', needsTeam: true, needsCell: false, prob: 0.1 },
+  { id: 'random', emoji: '🎲', name: '랜덤 이동', desc: '보드의 랜덤 위치로 이동합니다', needsTeam: false, needsCell: false, prob: 0.1 },
+  { id: 'double', emoji: '✨', name: '2배 코인', desc: '다음 코인 획득량이 2배가 됩니다', needsTeam: false, needsCell: false, prob: 0.1 },
+  { id: 'send', emoji: '📍', name: '강제 이동', desc: '한 팀을 지정된 칸으로 강제 이동시킵니다', needsTeam: true, needsCell: true, prob: 0.2 },
 ];
 
 const MONSTER_EVENTS = [
-  { id: 'loseCoin', emoji: '👹', name: '코인 강탈', desc: '몬스터가 코인 20개를 빼앗아 갑니다!' },
-  { id: 'redistribute', emoji: '⚖️', name: '코인 균등 분배', desc: '모든 팀의 코인을 합산하여 균등하게 나눕니다 (소수점 버림)' },
-  { id: 'richPoor', emoji: '💸', name: '빈부격차 해소', desc: '코인이 가장 많은 팀이 가장 적은 팀에게 코인 10개를 줍니다' },
-  { id: 'perform', emoji: '🎤', name: '공연 소환', desc: '이 팀에서 한 명이 노래나 춤을 선보여야 합니다!' },
+  { id: 'loseCoin', emoji: '👹', name: '코인 강탈', desc: '몬스터가 코인 20개를 빼앗아 갑니다!', prob: 0.3 },
+  { id: 'redistribute', emoji: '⚖️', name: '코인 균등 분배', desc: '모든 팀의 코인을 합산하여 균등하게 나눕니다 (소수점 버림)', prob: 0.2 },
+  { id: 'richPoor', emoji: '💸', name: '빈부격차 해소', desc: '코인이 가장 많은 팀이 가장 적은 팀에게 코인 10개를 줍니다', prob: 0.2 },
+  { id: 'perform', emoji: '🎤', name: '공연 소환', desc: '이 팀에서 한 명이 노래나 춤을 선보여야 합니다!', prob: 0.3 },
 ];
+
+function weightedRandom(events) {
+  const r = Math.random();
+  let cum = 0;
+  for (let i = 0; i < events.length; i++) {
+    cum += events[i].prob;
+    if (r < cum) return i;
+  }
+  return events.length - 1;
+}
 
 const KO = {
   title: 'GH 술먹어',
@@ -581,6 +599,7 @@ function SpecialEventModal({ teamIdx, teams, onApply, onStartCellPick }) {
   const stop = () => {
     if (stopped) return;
     clearInterval(ivRef.current);
+    setIdx(weightedRandom(SPECIAL_EVENTS));
     setStopped(true);
   };
 
@@ -660,6 +679,7 @@ function MonsterEventModal({ teams, teamIdx, onResolve }) {
   const stop = () => {
     if (stopped) return;
     clearInterval(ivRef.current);
+    setIdx(weightedRandom(MONSTER_EVENTS));
     setStopped(true);
   };
 
@@ -796,6 +816,13 @@ function RoundCarousel({ round, onClose }) {
                 style={{ background: '#E91E63', marginBottom: 12 }}
                 onClick={() => window.open(RHYTHM_LINKS[Math.floor(Math.random() * RHYTHM_LINKS.length)], '_blank')}
               >🎵 랜덤 노래 뽑기</button>
+            )}
+            {game.name === '그림자지우기' && (
+              <button
+                className="modal-play-again"
+                style={{ background: '#E91E63', marginBottom: 12 }}
+                onClick={() => window.open(SONGS_LINKS[Math.floor(Math.random() * SONGS_LINKS.length)], '_blank')}
+              >🎵 노래 틀기</button>
             )}
             <button className="modal-play-again" onClick={() => onClose(game)}>게임 시작! 🎮</button>
           </div>
